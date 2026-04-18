@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_helpdesk_stage_list" model="ir.ui.view">
+        <field name="name">helpdesk.stage.list</field>
+        <field name="model">helpdesk.stage</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="fold" widget="boolean_toggle"/>
+                <field name="is_close" widget="boolean_toggle"/>
+                <field name="team_ids" widget="many2many_tags"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_helpdesk_stage_form" model="ir.ui.view">
+        <field name="name">helpdesk.stage.form</field>
+        <field name="model">helpdesk.stage</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Stage name…"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="sequence"/>
+                            <field name="fold"/>
+                            <field name="is_close"/>
+                        </group>
+                        <group>
+                            <field name="team_ids" widget="many2many_tags"/>
+                            <field name="template_id"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Describe this stage…"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_helpdesk_stage" model="ir.actions.act_window">
+        <field name="name">Stages</field>
+        <field name="res_model">helpdesk.stage</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

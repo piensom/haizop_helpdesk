@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_my_home_helpdesk" name="Portal: Helpdesk entry" inherit_id="portal.portal_my_home" priority="50">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Tickets</t>
+                <t t-set="url" t-value="'/my/tickets'"/>
+                <t t-set="placeholder_count" t-value="'ticket_count'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="portal_my_tickets" name="My Tickets">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">My Tickets</t>
+            </t>
+            <t t-if="not tickets">
+                <p class="alert alert-info">You have no tickets yet.</p>
+            </t>
+            <t t-if="tickets" t-call="portal.portal_table">
+                <thead>
+                    <tr class="active">
+                        <th>Ticket #</th>
+                        <th>Subject</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="tickets" t-as="ticket">
+                        <td><a t-attf-href="/my/ticket/#{ticket.id}"><t t-out="ticket.number"/></a></td>
+                        <td><t t-out="ticket.name"/></td>
+                        <td><span class="badge text-bg-secondary"><t t-out="ticket.stage_id.name"/></span></td>
+                        <td><t t-out="ticket.create_date"/></td>
+                    </tr>
+                </tbody>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_ticket_page" name="Ticket">
+        <t t-call="portal.portal_layout">
+            <div class="mb-3">
+                <h3>
+                    <t t-out="ticket.number"/> — <t t-out="ticket.name"/>
+                    <span t-if="ticket.sla_status == 'breached'" class="badge text-bg-danger ms-2">SLA Breached</span>
+                    <span t-if="ticket.sla_status == 'at_risk'" class="badge text-bg-warning ms-2">At Risk</span>
+                    <span t-if="ticket.is_closed" class="badge text-bg-secondary ms-2">Closed</span>
+                </h3>
+                <p class="text-muted">Status: <strong t-out="ticket.stage_id.name"/> · Priority: <t t-out="dict(ticket._fields['priority'].selection).get(ticket.priority)"/></p>
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="text-muted">Description</h6>
+                        <div t-out="ticket.description"/>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h5>Conversation</h5>
+                    <t t-call="portal.message_thread">
+                        <t t-set="object" t-value="ticket"/>
+                    </t>
+                </div>
+                <div class="mt-4" t-if="not ticket.is_closed">
+                    <form t-attf-action="/my/ticket/#{ticket.id}/reply" method="post">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <div class="mb-2">
+                            <textarea name="body" class="form-control" rows="4" placeholder="Add a reply…" required="1"/>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send reply</button>
+                        <button type="submit" class="btn btn-outline-secondary" formaction="/my/ticket/{{ ticket.id }}/close">Mark as solved</button>
+                    </form>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

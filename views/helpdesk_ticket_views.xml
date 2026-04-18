@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_helpdesk_ticket_kanban" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.kanban</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id" quick_create="1" on_create="quick_create">
+                <field name="stage_id" options='{"group_by_tooltip": {"description": "Description"}}'/>
+                <field name="priority"/>
+                <field name="sla_status"/>
+                <field name="kanban_state"/>
+                <field name="user_id"/>
+                <field name="tag_ids"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_card o_kanban_record">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                    </strong>
+                                    <small class="text-muted">
+                                        <field name="number"/>
+                                    </small>
+                                </div>
+                                <field name="priority" widget="priority"/>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div t-if="record.partner_id.raw_value">
+                                    <field name="partner_id"/>
+                                </div>
+                                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <t t-if="record.sla_status.raw_value == 'breached'">
+                                        <span class="badge text-bg-danger">SLA Breached</span>
+                                    </t>
+                                    <t t-elif="record.sla_status.raw_value == 'at_risk'">
+                                        <span class="badge text-bg-warning">At Risk</span>
+                                    </t>
+                                    <t t-elif="record.sla_status.raw_value == 'reached'">
+                                        <span class="badge text-bg-success">SLA OK</span>
+                                    </t>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <field name="user_id" widget="many2one_avatar_user"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_helpdesk_ticket_list" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.list</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="sla_status == 'breached'" decoration-warning="sla_status == 'at_risk'" decoration-success="sla_status == 'reached'" decoration-muted="is_closed == True">
+                <field name="number"/>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="team_id"/>
+                <field name="stage_id"/>
+                <field name="priority" widget="priority"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="sla_deadline"/>
+                <field name="sla_status"/>
+                <field name="create_date"/>
+                <field name="is_closed" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_helpdesk_ticket_form" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.form</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}"/>
+                    <button name="action_close" type="object" string="Close" class="btn-primary" invisible="is_closed"/>
+                    <button name="action_reopen" type="object" string="Reopen" invisible="not is_closed"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-danger" role="alert" invisible="sla_status != 'breached'">
+                        ⚠ SLA breached — deadline <field name="sla_deadline" readonly="1" nolabel="1"/>
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="sla_status != 'at_risk'">
+                        ⏳ SLA at risk — deadline <field name="sla_deadline" readonly="1" nolabel="1"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="number" readonly="1" class="oe_inline"/> —
+                            <field name="name" placeholder="Subject…"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="partner_name"/>
+                            <field name="email_from"/>
+                            <field name="phone"/>
+                        </group>
+                        <group>
+                            <field name="team_id"/>
+                            <field name="user_id"/>
+                            <field name="priority" widget="priority"/>
+                            <field name="kanban_state" widget="state_selection"/>
+                            <field name="ticket_type_id"/>
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                            <field name="channel" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description" placeholder="Describe the issue…"/>
+                        </page>
+                        <page string="SLA" invisible="not sla_status_ids">
+                            <field name="sla_status_ids">
+                                <list>
+                                    <field name="sla_id"/>
+                                    <field name="target_type"/>
+                                    <field name="deadline"/>
+                                    <field name="reached_date"/>
+                                    <field name="status" widget="badge" decoration-danger="status == 'breached'" decoration-warning="status == 'at_risk'" decoration-success="status == 'reached'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Similar Tickets" invisible="not similar_ticket_ids">
+                            <field name="similar_ticket_ids">
+                                <list>
+                                    <field name="number"/>
+                                    <field name="name"/>
+                                    <field name="stage_id"/>
+                                    <field name="create_date"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Resolution" invisible="not is_closed">
+                            <group>
+                                <field name="close_reason"/>
+                                <field name="closed_date" readonly="1"/>
+                                <field name="merged_into_id" readonly="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_helpdesk_ticket_search" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.search</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="number"/>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="email_from"/>
+                <field name="user_id"/>
+                <field name="team_id"/>
+                <field name="tag_ids"/>
+                <filter string="My Tickets" name="my" domain="[('user_id', '=', uid)]"/>
+                <filter string="Unassigned" name="unassigned" domain="[('user_id', '=', False)]"/>
+                <separator/>
+                <filter string="Open" name="open" domain="[('is_closed', '=', False)]"/>
+                <filter string="Closed" name="closed" domain="[('is_closed', '=', True)]"/>
+                <separator/>
+                <filter string="Breached" name="breached" domain="[('sla_status', '=', 'breached')]"/>
+                <filter string="At Risk" name="at_risk" domain="[('sla_status', '=', 'at_risk')]"/>
+                <separator/>
+                <filter string="Urgent" name="urgent" domain="[('priority', '=', '4')]"/>
+                <separator/>
+                <filter string="Team" name="group_team" context="{'group_by': 'team_id'}"/>
+                <filter string="Stage" name="group_stage" context="{'group_by': 'stage_id'}"/>
+                <filter string="Assignee" name="group_user" context="{'group_by': 'user_id'}"/>
+                <filter string="Priority" name="group_priority" context="{'group_by': 'priority'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_helpdesk_ticket_pivot" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.pivot</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="team_id" type="row"/>
+                <field name="stage_id" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_helpdesk_ticket_graph" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.graph</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <graph>
+                <field name="team_id"/>
+                <field name="sla_status"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_helpdesk_ticket" model="ir.actions.act_window">
+        <field name="name">Tickets</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">kanban,list,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_helpdesk_ticket_search"/>
+        <field name="context">{"search_default_open": 1}</field>
+    </record>
+
+    <record id="action_helpdesk_my_tickets" model="ir.actions.act_window">
+        <field name="name">My Tickets</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('user_id', '=', uid), ('is_closed', '=', False)]</field>
+    </record>
+
+    <record id="action_helpdesk_breached" model="ir.actions.act_window">
+        <field name="name">SLA Breached</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('sla_status', '=', 'breached'), ('is_closed', '=', False)]</field>
+    </record>
+</odoo>

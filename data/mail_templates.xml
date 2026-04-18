@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="mail_template_ticket_ack" model="mail.template">
+        <field name="name">Helpdesk: Ticket Acknowledgement</field>
+        <field name="model_id" ref="model_helpdesk_ticket"/>
+        <field name="subject">[{{ object.number }}] We received your request</field>
+        <field name="email_from">{{ (object.team_id.alias_email or user.email_formatted) }}</field>
+        <field name="email_to">{{ object.partner_id.email or object.email_from }}</field>
+        <field name="body_html" type="html">
+            <div style="font-family:Arial,sans-serif;color:#0f172a;">
+                <p>Hi <t t-out="object.partner_name or (object.partner_id.name or 'there')"/>,</p>
+                <p>Thanks for reaching out — we received your request and assigned it ticket
+                    <strong><t t-out="object.number"/></strong>.</p>
+                <p><em>"<t t-out="object.name"/>"</em></p>
+                <p>We'll follow up as soon as possible.</p>
+            </div>
+        </field>
+    </record>
+
+    <record id="mail_template_rating_request" model="mail.template">
+        <field name="name">Helpdesk: Rating Request</field>
+        <field name="model_id" ref="model_helpdesk_ticket"/>
+        <field name="subject">How did we do? — [{{ object.number }}]</field>
+        <field name="email_to">{{ object.partner_id.email or object.email_from }}</field>
+        <field name="body_html" type="html">
+            <div style="font-family:Arial,sans-serif;">
+                <p>Hi,</p>
+                <p>Your ticket <strong><t t-out="object.number"/></strong> — "<t t-out="object.name"/>" — was just closed.</p>
+                <p>How did we do? <a t-att-href="object.get_portal_url()">Rate this support</a></p>
+            </div>
+        </field>
+    </record>
+</odoo>

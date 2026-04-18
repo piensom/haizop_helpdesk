@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Default stages -->
+    <record id="stage_new" model="helpdesk.stage">
+        <field name="name">New</field>
+        <field name="sequence">1</field>
+    </record>
+    <record id="stage_in_progress" model="helpdesk.stage">
+        <field name="name">In Progress</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="stage_waiting" model="helpdesk.stage">
+        <field name="name">Waiting on Customer</field>
+        <field name="sequence">20</field>
+        <field name="fold">True</field>
+    </record>
+    <record id="stage_solved" model="helpdesk.stage">
+        <field name="name">Solved</field>
+        <field name="sequence">30</field>
+        <field name="is_close">True</field>
+        <field name="fold">True</field>
+    </record>
+    <record id="stage_cancelled" model="helpdesk.stage">
+        <field name="name">Cancelled</field>
+        <field name="sequence">40</field>
+        <field name="is_close">True</field>
+        <field name="fold">True</field>
+    </record>
+
+    <!-- Default ticket types -->
+    <record id="type_question" model="helpdesk.ticket.type">
+        <field name="name">Question</field>
+    </record>
+    <record id="type_issue" model="helpdesk.ticket.type">
+        <field name="name">Issue</field>
+    </record>
+    <record id="type_feature" model="helpdesk.ticket.type">
+        <field name="name">Feature Request</field>
+    </record>
+
+    <!-- Default tags -->
+    <record id="tag_urgent" model="helpdesk.tag">
+        <field name="name">Urgent</field>
+        <field name="color">1</field>
+    </record>
+    <record id="tag_vip" model="helpdesk.tag">
+        <field name="name">VIP</field>
+        <field name="color">2</field>
+    </record>
+    <record id="tag_bug" model="helpdesk.tag">
+        <field name="name">Bug</field>
+        <field name="color">3</field>
+    </record>
+
+    <!-- Default team -->
+    <record id="team_support" model="helpdesk.team">
+        <field name="name">Customer Support</field>
+        <field name="use_alias">True</field>
+        <field name="use_website_form">True</field>
+        <field name="use_portal">True</field>
+        <field name="use_sla">True</field>
+        <field name="assignment_method">balanced</field>
+        <field name="stage_ids" eval="[(6, 0, [ref('stage_new'), ref('stage_in_progress'), ref('stage_waiting'), ref('stage_solved'), ref('stage_cancelled')])]"/>
+    </record>
+
+    <!-- Default SLA -->
+    <record id="sla_default_first" model="helpdesk.sla">
+        <field name="name">First Response — 4h</field>
+        <field name="team_id" ref="team_support"/>
+        <field name="target_type">first_response</field>
+        <field name="priority">0</field>
+        <field name="time_hours">4.0</field>
+    </record>
+    <record id="sla_default_resolution" model="helpdesk.sla">
+        <field name="name">Resolution — 24h</field>
+        <field name="team_id" ref="team_support"/>
+        <field name="target_type">resolution</field>
+        <field name="priority">0</field>
+        <field name="time_hours">24.0</field>
+        <field name="stage_id" ref="stage_solved"/>
+    </record>
+    <record id="sla_urgent_first" model="helpdesk.sla">
+        <field name="name">Urgent First Response — 1h</field>
+        <field name="team_id" ref="team_support"/>
+        <field name="target_type">first_response</field>
+        <field name="priority">4</field>
+        <field name="time_hours">1.0</field>
+    </record>
+
+    <!-- Webhook events -->
+    <record id="webhook_event_create" model="helpdesk.webhook.event">
+        <field name="code">ticket.create</field>
+        <field name="name">Ticket Created</field>
+    </record>
+    <record id="webhook_event_stage" model="helpdesk.webhook.event">
+        <field name="code">ticket.stage_change</field>
+        <field name="name">Stage Changed</field>
+    </record>
+    <record id="webhook_event_assign" model="helpdesk.webhook.event">
+        <field name="code">ticket.assign</field>
+        <field name="name">Assignee Changed</field>
+    </record>
+    <record id="webhook_event_close" model="helpdesk.webhook.event">
+        <field name="code">ticket.close</field>
+        <field name="name">Ticket Closed</field>
+    </record>
+</odoo>

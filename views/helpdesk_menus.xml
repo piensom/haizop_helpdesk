@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_helpdesk_root" name="Helpdesk" web_icon="haizop_helpdesk,static/description/icon.png" sequence="25"/>
+
+    <menuitem id="menu_helpdesk_tickets_root" name="Tickets" parent="menu_helpdesk_root" sequence="10"/>
+    <menuitem id="menu_helpdesk_my_tickets" name="My Tickets" parent="menu_helpdesk_tickets_root" action="action_helpdesk_my_tickets" sequence="5"/>
+    <menuitem id="menu_helpdesk_all_tickets" name="All Tickets" parent="menu_helpdesk_tickets_root" action="action_helpdesk_ticket" sequence="10"/>
+    <menuitem id="menu_helpdesk_breached" name="SLA Breached" parent="menu_helpdesk_tickets_root" action="action_helpdesk_breached" sequence="20"/>
+
+    <menuitem id="menu_helpdesk_teams" name="Teams" parent="menu_helpdesk_root" action="action_helpdesk_team" sequence="20"/>
+
+    <menuitem id="menu_helpdesk_config" name="Configuration" parent="menu_helpdesk_root" sequence="99" groups="haizop_helpdesk.group_helpdesk_manager"/>
+    <menuitem id="menu_helpdesk_config_stages" name="Stages" parent="menu_helpdesk_config" action="action_helpdesk_stage" sequence="10"/>
+    <menuitem id="menu_helpdesk_config_tags" name="Tags" parent="menu_helpdesk_config" action="action_helpdesk_tag" sequence="20"/>
+    <menuitem id="menu_helpdesk_config_types" name="Ticket Types" parent="menu_helpdesk_config" action="action_helpdesk_ticket_type" sequence="30"/>
+    <menuitem id="menu_helpdesk_config_sla" name="SLA Policies" parent="menu_helpdesk_config" action="action_helpdesk_sla" sequence="40"/>
+    <menuitem id="menu_helpdesk_config_webhooks" name="Webhooks" parent="menu_helpdesk_config" action="action_helpdesk_webhook" sequence="50"/>
+</odoo>

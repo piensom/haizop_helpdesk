@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_helpdesk_team_kanban" model="ir.ui.view">
+        <field name="name">helpdesk.team.kanban</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <kanban create="1" edit="1">
+                <field name="open_ticket_count"/>
+                <field name="breach_count"/>
+                <field name="at_risk_count"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_card o_kanban_record">
+                            <div class="o_kanban_record_top">
+                                <strong><field name="name"/></strong>
+                            </div>
+                            <div class="o_kanban_record_body text-muted small">
+                                <div>Open: <field name="open_ticket_count"/></div>
+                                <div>At risk: <field name="at_risk_count"/></div>
+                                <div>Breached: <field name="breach_count"/></div>
+                            </div>
+                            <div>
+                                <button type="object" name="action_view_tickets" class="btn btn-sm btn-primary">Tickets</button>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_helpdesk_team_list" model="ir.ui.view">
+        <field name="name">helpdesk.team.list</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="assignment_method"/>
+                <field name="open_ticket_count"/>
+                <field name="at_risk_count"/>
+                <field name="breach_count"/>
+                <field name="use_sla" widget="boolean_toggle"/>
+                <field name="use_rating" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_helpdesk_team_form" model="ir.ui.view">
+        <field name="name">helpdesk.team.form</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_view_tickets" icon="fa-ticket">
+                            <field name="open_ticket_count" widget="statinfo" string="Open"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Team name…"/></h1>
+                    </div>
+                    <group>
+                        <group string="People">
+                            <field name="member_ids" widget="many2many_tags"/>
+                            <field name="assignment_method"/>
+                            <field name="resource_calendar_id"/>
+                        </group>
+                        <group string="Channels">
+                            <field name="use_alias"/>
+                            <field name="alias_name" invisible="not use_alias"/>
+                            <field name="use_website_form"/>
+                            <field name="use_portal"/>
+                        </group>
+                        <group string="Features">
+                            <field name="use_sla"/>
+                            <field name="use_rating"/>
+                            <field name="use_similar_detection"/>
+                            <field name="use_ai_triage"/>
+                        </group>
+                        <group string="AI" invisible="not use_ai_triage">
+                            <field name="ai_provider"/>
+                            <field name="ai_endpoint"/>
+                            <field name="ai_api_key" password="True"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Stages">
+                            <field name="stage_ids" widget="many2many_tags"/>
+                        </page>
+                        <page string="SLA Policies">
+                            <field name="sla_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="target_type"/>
+                                    <field name="priority"/>
+                                    <field name="time_hours"/>
+                                    <field name="stage_id"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Description">
+                            <field name="description"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_helpdesk_team" model="ir.actions.act_window">
+        <field name="name">Teams</field>
+        <field name="res_model">helpdesk.team</field>
+        <field name="view_mode">kanban,list,form</field>
+    </record>
+</odoo>
