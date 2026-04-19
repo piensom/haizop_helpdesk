@@ -1,9 +1,35 @@
+import base64
 from collections import OrderedDict
 
 from odoo import _, http
 from odoo.exceptions import AccessError, MissingError
 from odoo.http import request
 from odoo.addons.portal.controllers.portal import CustomerPortal, pager as portal_pager
+
+
+ALLOWED_CLOSE_REASONS = {"solved", "duplicate", "no_response", "cannot_reproduce", "other"}
+
+
+def _save_portal_attachments(files, ticket):
+    if not files:
+        return
+    if not isinstance(files, list):
+        files = [files]
+    Attachment = request.env["ir.attachment"].sudo()
+    max_size = 25 * 1024 * 1024
+    for f in files:
+        if not f or not getattr(f, "filename", None):
+            continue
+        data = f.read(max_size + 1)
+        if len(data) > max_size:
+            continue
+        Attachment.create({
+            "name": f.filename[:128],
+            "datas": base64.b64encode(data),
+            "res_model": "helpdesk.ticket",
+            "res_id": ticket.id,
+            "mimetype": (f.mimetype or "application/octet-stream").split(";", 1)[0],
+        })
 
 
 class HelpdeskCustomerPortal(CustomerPortal):
@@ -78,7 +104,21 @@ class HelpdeskCustomerPortal(CustomerPortal):
             return request.redirect("/my/tickets")
         body = (post.get("body") or "").strip()
         if body:
-            ticket.message_post(body=body, message_type="comment", subtype_xmlid="mail.mt_comment")
+            files = request.httprequest.files.getlist("attachments")
+            attachment_ids = []
+            if files:
+                pre_ticket = ticket.sudo()
+                _save_portal_attachments(files, pre_ticket)
+                # take the attachments we just created (most recent for this ticket)
+                recent = request.env["ir.attachment"].sudo().search([
+                    ("res_model", "=", "helpdesk.ticket"),
+                    ("res_id", "=", ticket.id),
+                ], limit=len(files), order="create_date desc")
+                attachment_ids = recent.ids
+            ticket.message_post(
+                body=body, message_type="comment", subtype_xmlid="mail.mt_comment",
+                attachment_ids=attachment_ids,
+            )
         return request.redirect(f"/my/ticket/{ticket.id}")
 
     @http.route(["/my/ticket/<int:ticket_id>/close"], type="http", auth="user",
@@ -86,5 +126,16 @@ class HelpdeskCustomerPortal(CustomerPortal):
     def portal_ticket_close(self, ticket_id, **post):
         ticket = request.env["helpdesk.ticket"].browse(ticket_id)
         if ticket.partner_id == request.env.user.partner_id:
-            ticket.action_close(reason="solved")
+            reason = post.get("reason") or "solved"
+            if reason not in ALLOWED_CLOSE_REASONS:
+                reason = "solved"
+            ticket.action_close(reason=reason)
+        return request.redirect(f"/my/ticket/{ticket.id}")
+
+    @http.route(["/my/ticket/<int:ticket_id>/reopen"], type="http", auth="user",
+                website=True, methods=["POST"], csrf=True)
+    def portal_ticket_reopen(self, ticket_id, **post):
+        ticket = request.env["helpdesk.ticket"].browse(ticket_id)
+        if ticket.partner_id == request.env.user.partner_id:
+            ticket.action_reopen()
         return request.redirect(f"/my/ticket/{ticket.id}")

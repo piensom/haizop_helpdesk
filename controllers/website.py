@@ -1,5 +1,42 @@
+import base64
+
 from odoo import _, http
 from odoo.http import request
+
+
+def _save_attachments(files, ticket):
+    """Attach uploaded files to a ticket as ir.attachment."""
+    if not files:
+        return
+    if not isinstance(files, list):
+        files = [files]
+    Attachment = request.env["ir.attachment"].sudo()
+    max_size = 25 * 1024 * 1024  # 25 MB
+    allowed = {
+        "image/png", "image/jpeg", "image/gif", "image/webp",
+        "application/pdf", "application/zip",
+        "text/plain", "text/csv",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/octet-stream",
+    }
+    for f in files:
+        if not f or not getattr(f, "filename", None):
+            continue
+        data = f.read(max_size + 1)
+        if len(data) > max_size:
+            continue  # silently drop oversize files; ticket still created
+        mime = (f.mimetype or "application/octet-stream").split(";", 1)[0]
+        if mime not in allowed:
+            continue
+        Attachment.create({
+            "name": f.filename[:128],
+            "datas": base64.b64encode(data),
+            "res_model": "helpdesk.ticket",
+            "res_id": ticket.id,
+            "mimetype": mime,
+        })
 
 
 class HelpdeskWebsite(http.Controller):
@@ -36,6 +73,7 @@ class HelpdeskWebsite(http.Controller):
         priority = post.get("priority") or "2"
         if not (name and email and subject and description):
             return request.redirect(f"/helpdesk/{team.id}?error=missing")
+
         ticket = request.env["helpdesk.ticket"].sudo().create({
             "name": subject,
             "description": description,
@@ -45,4 +83,36 @@ class HelpdeskWebsite(http.Controller):
             "priority": priority,
             "channel": "web",
         })
+
+        # attachments
+        files = request.httprequest.files.getlist("attachments") if hasattr(request, "httprequest") else []
+        _save_attachments(files, ticket)
+
+        # auto-acknowledgement email
+        template = request.env.ref("haizop_helpdesk.mail_template_ticket_ack", raise_if_not_found=False)
+        if template:
+            try:
+                template.sudo().send_mail(ticket.id, force_send=False, email_values={"email_to": email})
+            except Exception:  # pragma: no cover
+                pass
+
         return request.redirect(f"/helpdesk/{team.id}?submitted={ticket.number}")
+
+    # ---------- Public tracking ----------
+    @http.route(["/helpdesk/track"], type="http", auth="public", website=True, sitemap=False)
+    def track_form(self, number=None, email=None, **kw):
+        if not (number and email):
+            return request.render("haizop_helpdesk.public_track_form", {
+                "number": number, "email": email, "error": None,
+            })
+        Ticket = request.env["helpdesk.ticket"].sudo()
+        ticket = Ticket.search([
+            ("number", "=", number.strip()),
+            ("email_from", "=ilike", email.strip()),
+        ], limit=1)
+        if not ticket:
+            return request.render("haizop_helpdesk.public_track_form", {
+                "number": number, "email": email,
+                "error": _("No ticket matches that number + e-mail combination."),
+            })
+        return request.render("haizop_helpdesk.public_track_result", {"ticket": ticket})

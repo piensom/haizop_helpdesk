@@ -1,61 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="website_helpdesk_team" name="Helpdesk Team Form">
-        <t t-call="website.layout">
-            <div id="wrap" class="oe_structure">
-                <section class="s_title pt32 pb24">
-                    <div class="container">
-                        <h1>How can we help?</h1>
-                        <p class="lead text-muted">Submit a support request — we'll get back to you fast.</p>
+        <t t-call="haizop_helpdesk.hz_portal_shell">
+            <t t-set="is_logged" t-value="False"/>
+            <div class="hz-portal-head">
+                <div>
+                    <h1>How can we help?</h1>
+                    <p class="hz-portal-muted">Submit a support request — we'll get back to you.</p>
+                </div>
+                <a href="/helpdesk/track" class="hz-portal-btn hz-portal-btn-outline">Track an existing ticket →</a>
+            </div>
+
+            <t t-if="submitted">
+                <div class="hz-portal-alert hz-portal-alert-ok">
+                    ✓ Thanks! Your ticket <strong t-out="submitted"/> was created. Check the e-mail for follow-up.
+                </div>
+            </t>
+
+            <div class="hz-portal-card">
+                <form t-attf-action="/helpdesk/#{team.id}/submit" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <label>Name *
+                        <input type="text" name="name" class="hz-portal-input" required="1"/>
+                    </label>
+                    <label>E-mail *
+                        <input type="email" name="email" class="hz-portal-input" required="1"/>
+                    </label>
+                    <label>Subject *
+                        <input type="text" name="subject" class="hz-portal-input" required="1"/>
+                    </label>
+                    <label>Priority
+                        <select name="priority" class="hz-portal-input">
+                            <option value="1">Low</option>
+                            <option value="2" selected="1">Normal</option>
+                            <option value="3">High</option>
+                            <option value="4">Urgent</option>
+                        </select>
+                    </label>
+                    <label>Description *
+                        <textarea name="description" rows="6" class="hz-portal-input" required="1"/>
+                    </label>
+                    <div class="hz-portal-file">
+                        <label>Attach screenshots or logs (optional):
+                            <input type="file" name="attachments" multiple="multiple"/>
+                        </label>
                     </div>
-                </section>
-                <section class="container pb64">
-                    <t t-if="submitted">
-                        <div class="alert alert-success">
-                            Thanks! Your ticket <strong t-out="submitted"/> was created. We'll email you shortly.
-                        </div>
-                    </t>
-                    <div class="row">
-                        <div class="col-lg-8">
-                            <form t-attf-action="/helpdesk/#{team.id}/submit" method="post" class="card card-body">
-                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                <div class="mb-3">
-                                    <label class="form-label">Name</label>
-                                    <input type="text" name="name" class="form-control" required="1"/>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Email</label>
-                                    <input type="email" name="email" class="form-control" required="1"/>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Subject</label>
-                                    <input type="text" name="subject" class="form-control" required="1"/>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Priority</label>
-                                    <select name="priority" class="form-select">
-                                        <option value="1">Low</option>
-                                        <option value="2" selected="1">Normal</option>
-                                        <option value="3">High</option>
-                                        <option value="4">Urgent</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Description</label>
-                                    <textarea name="description" rows="6" class="form-control" required="1"/>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Submit ticket</button>
-                            </form>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="card card-body bg-light">
-                                <h5><t t-out="team.name"/></h5>
-                                <p class="small text-muted" t-if="team.description"><t t-out="team.description"/></p>
-                                <p class="small">Average response: &lt; 4h during business hours.</p>
-                            </div>
-                        </div>
+                    <div class="hz-portal-actions">
+                        <button type="submit" class="hz-portal-btn hz-portal-btn-primary">Submit ticket</button>
                     </div>
-                </section>
+                    <p class="hz-portal-muted" style="margin-top: 12px;">
+                        By submitting, you accept our <a href="/datenschutz">privacy policy</a>.
+                    </p>
+                </form>
             </div>
         </t>
     </template>
