@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Dashboard kanban: big stat cards per team -->
+    <record id="view_helpdesk_dashboard_kanban" model="ir.ui.view">
+        <field name="name">helpdesk.team.dashboard.kanban</field>
+        <field name="model">helpdesk.team</field>
+        <field name="priority">2</field>
+        <field name="arch" type="xml">
+            <kanban create="0" edit="0" class="o_helpdesk_dashboard">
+                <field name="open_ticket_count"/>
+                <field name="breach_count"/>
+                <field name="at_risk_count"/>
+                <field name="unassigned_count"/>
+                <field name="today_created"/>
+                <field name="today_closed"/>
+                <field name="avg_resolution_hours"/>
+                <field name="sla_success_rate"/>
+                <field name="color"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="o_helpdesk_dashboard_card">
+                            <div class="o_hd_header">
+                                <h2><field name="name"/></h2>
+                                <span class="o_hd_badge" t-att-data-state="record.sla_success_rate.raw_value &gt;= 90 ? 'good' : (record.sla_success_rate.raw_value &gt;= 70 ? 'warn' : 'bad')">
+                                    <field name="sla_success_rate"/>% SLA
+                                </span>
+                            </div>
+                            <div class="o_hd_kpi_grid">
+                                <a name="action_view_tickets" type="object" class="o_hd_kpi o_hd_primary">
+                                    <div class="o_hd_num"><field name="open_ticket_count"/></div>
+                                    <div class="o_hd_lbl">Open</div>
+                                </a>
+                                <div class="o_hd_kpi o_hd_danger" t-if="record.breach_count.raw_value">
+                                    <div class="o_hd_num"><field name="breach_count"/></div>
+                                    <div class="o_hd_lbl">Breached</div>
+                                </div>
+                                <div class="o_hd_kpi o_hd_danger_empty" t-if="!record.breach_count.raw_value">
+                                    <div class="o_hd_num">0</div>
+                                    <div class="o_hd_lbl">Breached</div>
+                                </div>
+                                <div class="o_hd_kpi o_hd_warn">
+                                    <div class="o_hd_num"><field name="at_risk_count"/></div>
+                                    <div class="o_hd_lbl">At Risk</div>
+                                </div>
+                                <div class="o_hd_kpi o_hd_muted">
+                                    <div class="o_hd_num"><field name="unassigned_count"/></div>
+                                    <div class="o_hd_lbl">Unassigned</div>
+                                </div>
+                            </div>
+                            <div class="o_hd_row">
+                                <div class="o_hd_mini">
+                                    <span class="o_hd_mini_num">+<field name="today_created"/></span>
+                                    <span class="o_hd_mini_lbl">today</span>
+                                </div>
+                                <div class="o_hd_mini">
+                                    <span class="o_hd_mini_num o_hd_green">✓<field name="today_closed"/></span>
+                                    <span class="o_hd_mini_lbl">closed today</span>
+                                </div>
+                                <div class="o_hd_mini">
+                                    <span class="o_hd_mini_num"><field name="avg_resolution_hours"/>h</span>
+                                    <span class="o_hd_mini_lbl">avg resolve 30d</span>
+                                </div>
+                            </div>
+                            <div class="o_hd_actions">
+                                <button name="action_view_tickets" type="object" class="btn btn-sm btn-primary">Open tickets →</button>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="action_helpdesk_dashboard" model="ir.actions.act_window">
+        <field name="name">Dashboard</field>
+        <field name="res_model">helpdesk.team</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="view_id" ref="view_helpdesk_dashboard_kanban"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No helpdesk teams yet</p>
+            <p>Create a team to start routing tickets and tracking SLA.</p>
+        </field>
+    </record>
+
+</odoo>

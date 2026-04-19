@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from odoo import api, fields, models
 
 
@@ -67,22 +69,53 @@ class HelpdeskTeam(models.Model):
     open_ticket_count = fields.Integer(compute="_compute_ticket_counts")
     breach_count = fields.Integer(compute="_compute_ticket_counts")
     at_risk_count = fields.Integer(compute="_compute_ticket_counts")
+    unassigned_count = fields.Integer(compute="_compute_ticket_counts")
+    today_created = fields.Integer(compute="_compute_ticket_counts")
+    today_closed = fields.Integer(compute="_compute_ticket_counts")
+    avg_resolution_hours = fields.Float(compute="_compute_ticket_counts", digits=(5, 1))
+    sla_success_rate = fields.Integer(compute="_compute_ticket_counts",
+        help="Percent of resolved SLAs that were reached on time (last 30 days).")
 
     @api.depends()
     def _compute_ticket_counts(self):
         Ticket = self.env["helpdesk.ticket"]
+        Status = self.env["helpdesk.sla.status"]
+        today = fields.Datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        month_ago = fields.Datetime.now() - timedelta(days=30)
         for team in self:
-            team.open_ticket_count = Ticket.search_count([("team_id", "=", team.id), ("is_closed", "=", False)])
-            team.breach_count = Ticket.search_count([
-                ("team_id", "=", team.id),
-                ("is_closed", "=", False),
-                ("sla_status", "=", "breached"),
+            base = [("team_id", "=", team.id)]
+            team.open_ticket_count = Ticket.search_count(base + [("is_closed", "=", False)])
+            team.breach_count = Ticket.search_count(
+                base + [("is_closed", "=", False), ("sla_status", "=", "breached")])
+            team.at_risk_count = Ticket.search_count(
+                base + [("is_closed", "=", False), ("sla_status", "=", "at_risk")])
+            team.unassigned_count = Ticket.search_count(
+                base + [("is_closed", "=", False), ("user_id", "=", False)])
+            team.today_created = Ticket.search_count(base + [("create_date", ">=", today)])
+            team.today_closed = Ticket.search_count(
+                base + [("closed_date", ">=", today)])
+            # avg resolution
+            closed = Ticket.search(base + [
+                ("is_closed", "=", True), ("closed_date", ">=", month_ago),
             ])
-            team.at_risk_count = Ticket.search_count([
-                ("team_id", "=", team.id),
-                ("is_closed", "=", False),
-                ("sla_status", "=", "at_risk"),
+            if closed:
+                total_hours = sum(
+                    ((t.closed_date - t.create_date).total_seconds() / 3600.0)
+                    for t in closed if t.closed_date and t.create_date
+                )
+                team.avg_resolution_hours = total_hours / len(closed)
+            else:
+                team.avg_resolution_hours = 0.0
+            # SLA success rate (30d)
+            done_statuses = Status.search([
+                ("ticket_id.team_id", "=", team.id),
+                ("reached_date", ">=", month_ago),
             ])
+            if done_statuses:
+                reached = len(done_statuses.filtered(lambda s: s.status == "reached"))
+                team.sla_success_rate = int(round(100 * reached / len(done_statuses)))
+            else:
+                team.sla_success_rate = 100
 
     # mail.alias.mixin
     def _alias_get_creation_values(self):

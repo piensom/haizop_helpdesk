@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_helpdesk_root" name="Helpdesk" web_icon="haizop_helpdesk,static/description/icon.png" sequence="25"/>
+    <menuitem id="menu_helpdesk_root" name="Helpdesk"
+              action="action_helpdesk_dashboard"
+              web_icon="haizop_helpdesk,static/description/icon.png" sequence="25"/>
+
+    <menuitem id="menu_helpdesk_dashboard" name="Dashboard"
+              parent="menu_helpdesk_root" action="action_helpdesk_dashboard" sequence="1"/>
 
     <menuitem id="menu_helpdesk_tickets_root" name="Tickets" parent="menu_helpdesk_root" sequence="10"/>
     <menuitem id="menu_helpdesk_my_tickets" name="My Tickets" parent="menu_helpdesk_tickets_root" action="action_helpdesk_my_tickets" sequence="5"/>
