@@ -336,6 +336,14 @@ class HelpdeskTicket(models.Model):
 
     # ---------- Mail gateway ----------
     def message_post(self, **kwargs):
+        # Always prefix subject with [HDxxxxx] so Outlook/Gmail thread correctly
+        # and the recipient sees the ticket number instead of a raw subject.
+        if self and not kwargs.get("subject"):
+            self.ensure_one()
+            number = self.number or _("New")
+            kwargs["subject"] = f"[{number}] {self.name or _('Ticket')}"
+        elif self and kwargs.get("subject") and self.number and f"[{self.number}]" not in (kwargs["subject"] or ""):
+            kwargs["subject"] = f"[{self.number}] {kwargs['subject']}"
         msg = super().message_post(**kwargs)
         try:
             if kwargs.get("message_type") == "comment" and msg.author_id and msg.author_id != self.partner_id:
