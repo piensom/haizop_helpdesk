@@ -132,12 +132,17 @@ class HelpdeskWebsite(http.Controller):
                     description=_h(description),
                 )
                 ticket.sudo().message_subscribe(partner_ids=partner_ids)
+                # Post as OdooBot so every team member (not just the "author")
+                # receives the notification email.
+                bot = request.env.ref("base.partner_root",
+                                      raise_if_not_found=False)
                 ticket.sudo().message_post(
                     body=body,
                     subject=f"[{ticket.number}] {subject}",
                     message_type="comment",
                     subtype_xmlid="mail.mt_comment",
                     partner_ids=partner_ids,
+                    author_id=bot.id if bot else False,
                 )
                 _logger.info("Ticket %s notified %s team members", ticket.number, len(partner_ids))
         except Exception:  # noqa: BLE001
