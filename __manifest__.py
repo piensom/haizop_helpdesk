@@ -21,6 +21,7 @@ Highlights vs. Enterprise:
     "license": "LGPL-3",
     "depends": [
         "base", "mail", "portal", "website", "rating", "utm", "resource",
+        "auth_signup",
     ],
     "data": [
         "security/helpdesk_security.xml",

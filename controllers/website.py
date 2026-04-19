@@ -10,6 +10,48 @@ from odoo.http import request
 _logger = logging.getLogger(__name__)
 
 
+def _ensure_portal_user(name, email, phone=None):
+    """Find or create a res.partner for this email and provision a portal
+    user with a signup invitation. Returns the partner (or False on failure)."""
+    if not email:
+        return False
+    try:
+        Partner = request.env["res.partner"].sudo()
+        partner = Partner.search([("email", "=ilike", email)], limit=1)
+        if not partner:
+            partner = Partner.create({
+                "name": name or email,
+                "email": email,
+                "phone": phone or False,
+            })
+
+        User = request.env["res.users"].sudo()
+        user = User.with_context(active_test=False).search(
+            [("login", "=", email)], limit=1)
+        if not user:
+            portal_grp = request.env.ref("base.group_portal")
+            user = User.with_context(no_reset_password=True).create({
+                "name": name or email,
+                "login": email,
+                "email": email,
+                "partner_id": partner.id,
+                "group_ids": [(6, 0, [portal_grp.id])],
+            })
+            try:
+                # Sends a "set your password" invitation email to the user.
+                user.action_reset_password()
+                _logger.info("Portal user created + invited for %s", email)
+            except Exception:  # noqa: BLE001
+                _logger.exception("Could not send signup invite to %s", email)
+        elif not user.active:
+            user.active = True
+            _logger.info("Reactivated portal user %s", email)
+        return partner
+    except Exception:  # noqa: BLE001
+        _logger.exception("Portal provisioning failed for %s", email)
+        return False
+
+
 def _save_attachments(files, ticket):
     """Attach uploaded files to a ticket as ir.attachment."""
     if not files:
@@ -80,9 +122,14 @@ class HelpdeskWebsite(http.Controller):
         if not (name and email and subject and description):
             return request.redirect(f"/helpdesk/{team.id}?error=missing")
 
+        # Ensure a portal user exists for this email so the submitter can
+        # track + reply on /my/tickets after setting a password.
+        partner = _ensure_portal_user(name, email, phone=None)
+
         ticket = request.env["helpdesk.ticket"].sudo().create({
             "name": subject,
             "description": description,
+            "partner_id": partner.id if partner else False,
             "partner_name": name,
             "email_from": email,
             "team_id": team.id,

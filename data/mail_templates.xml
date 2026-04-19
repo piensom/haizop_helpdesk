@@ -7,6 +7,7 @@
         <field name="email_from">"HAIZOP Support" &lt;schindowski@haizop.de&gt;</field>
         <field name="reply_to">{{ object.team_id.alias_email or "info@haizop.com" }}</field>
         <field name="email_to">{{ object.partner_id.email or object.email_from }}</field>
+        <field name="email_cc">schindowski@haizop.de</field>
         <field name="body_html" type="html">
             <div style="font-family:Arial,-apple-system,Segoe UI,sans-serif;color:#0f172a;background:#f8fafc;padding:0;margin:0;">
                 <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">

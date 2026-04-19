@@ -31,12 +31,14 @@
             <nav class="hz-portal-nav">
                 <div class="hz-portal-nav-inner">
                     <a href="/" class="hz-portal-brand">◆ HAIZOP</a>
+                    <div class="hz-portal-nav-meta">HAIZOP Support &amp; Kundenportal</div>
                     <div class="hz-portal-links">
-                        <a href="/my/tickets">My tickets</a>
-                        <a href="/helpdesk">New ticket</a>
-                        <a href="/my" t-if="is_logged">My account</a>
-                        <a href="/web/session/logout" t-if="is_logged">Log out</a>
-                        <a href="/web/login" t-if="not is_logged">Log in</a>
+                        <a href="/helpdesk">Neues Ticket</a>
+                        <a href="/helpdesk/track">Ticket-Status</a>
+                        <a href="/my/tickets" t-if="is_logged">Meine Tickets</a>
+                        <a href="/my" t-if="is_logged">Mein Konto</a>
+                        <a href="/web/session/logout" t-if="is_logged">Abmelden</a>
+                        <a href="/web/login" t-if="not is_logged">Anmelden</a>
                     </div>
                 </div>
             </nav>
@@ -46,13 +48,38 @@
                 </div>
             </main>
             <footer class="hz-portal-footer">
-                <div class="hz-portal-footer-inner">
-                    <span>© 2026 HAIZOP GmbH, Leipzig</span>
-                    <span>
+                <div class="hz-portal-footer-cols">
+                    <div>
+                        <div class="hz-portal-footer-brand">◆ HAIZOP GmbH</div>
+                        <div class="hz-portal-footer-addr">
+                            Tschaikowskistraße 21<br/>
+                            04105 Leipzig, Deutschland
+                        </div>
+                        <div class="hz-portal-footer-addr">
+                            Geschäftsführer: Christian Machens
+                        </div>
+                    </div>
+                    <div>
+                        <div class="hz-portal-footer-heading">Support</div>
+                        <a href="/helpdesk">Ticket öffnen</a>
+                        <a href="/helpdesk/track">Ticket-Status prüfen</a>
+                        <a href="mailto:info@haizop.com">info@haizop.com</a>
+                        <a href="tel:+4915124155887">+49 151 24 155 887</a>
+                    </div>
+                    <div>
+                        <div class="hz-portal-footer-heading">Rechtliches</div>
                         <a href="/impressum">Impressum</a>
                         <a href="/datenschutz">Datenschutz</a>
-                        <a href="mailto:info@haizop.com">Kontakt</a>
-                    </span>
+                    </div>
+                    <div>
+                        <div class="hz-portal-footer-heading">Produkt</div>
+                        <a href="/">haizop.de</a>
+                        <a href="/web/login">Anmelden</a>
+                    </div>
+                </div>
+                <div class="hz-portal-footer-bottom">
+                    <span>© 2026 HAIZOP GmbH, Leipzig · Alle Rechte vorbehalten.</span>
+                    <span>Serverstandort Deutschland · Methodik nach IEC 61882</span>
                 </div>
             </footer>
         </t>

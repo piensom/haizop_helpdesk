@@ -263,3 +263,74 @@
 .hz-portal-card form .hz-portal-form-row { margin-bottom: 0; }
 .hz-portal-card form .hz-portal-form-row > label { margin-bottom: 14px; }
 .hz-portal-card form .hz-portal-input { display: block; margin-top: 4px; }
+
+/* ===== Improved portal header + footer ===== */
+.hz-portal-nav-inner { position: relative; }
+.hz-portal-nav-meta {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 13px;
+    color: #cbd5e1;
+    letter-spacing: .02em;
+    pointer-events: none;
+}
+@media (max-width: 820px) {
+    .hz-portal-nav-meta { display: none; }
+}
+
+.hz-portal-footer-cols {
+    max-width: 960px;
+    margin: 0 auto 20px;
+    padding: 28px 0 10px;
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr 1fr;
+    gap: 32px;
+    color: #cbd5e1;
+    font-size: 13px;
+    line-height: 1.6;
+}
+.hz-portal-footer-cols > div a {
+    display: block;
+    color: #cbd5e1 !important;
+    text-decoration: none !important;
+    margin: 2px 0;
+    margin-left: 0 !important;
+    font-size: 13px;
+}
+.hz-portal-footer-cols > div a:hover { color: #fff !important; }
+.hz-portal-footer-brand {
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 8px;
+    letter-spacing: .02em;
+}
+.hz-portal-footer-addr { color: #94a3b8; margin-bottom: 6px; font-size: 13px; }
+.hz-portal-footer-heading {
+    color: #fff;
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    margin-bottom: 10px;
+}
+.hz-portal-footer-bottom {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 14px 0 6px;
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: #64748b;
+    font-size: 12px;
+}
+@media (max-width: 820px) {
+    .hz-portal-footer-cols { grid-template-columns: 1fr 1fr; gap: 24px; }
+}
+@media (max-width: 480px) {
+    .hz-portal-footer-cols { grid-template-columns: 1fr; }
+    .hz-portal-footer-bottom { flex-direction: column; text-align: center; }
+}
