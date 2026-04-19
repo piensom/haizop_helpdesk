@@ -1,5 +1,8 @@
 import base64
 import logging
+from html import escape as _h
+
+from markupsafe import Markup
 
 from odoo import _, http
 from odoo.http import request
@@ -101,6 +104,44 @@ class HelpdeskWebsite(http.Controller):
             except Exception:  # noqa: BLE001
                 _logger.exception("Helpdesk ack email FAILED for ticket %s -> %s",
                                   ticket.number, email)
+
+        # Notify all helpdesk team members by email
+        try:
+            members = team.member_ids
+            partner_ids = members.mapped("partner_id").ids
+            if partner_ids:
+                priority_labels = dict(ticket._fields["priority"].selection)
+                body = Markup(
+                    '<p><strong>Neues Support-Ticket</strong> — <code>{number}</code></p>'
+                    '<ul>'
+                    '<li>Betreff: {subject}</li>'
+                    '<li>Priorität: {priority}</li>'
+                    '<li>Name: {name}</li>'
+                    '<li>E-Mail: {email}</li>'
+                    '</ul>'
+                    '<p>Beschreibung:</p>'
+                    '<blockquote style="border-left:3px solid #0284c7;padding-left:10px;color:#475569;">'
+                    '{description}'
+                    '</blockquote>'
+                ).format(
+                    number=_h(ticket.number),
+                    subject=_h(subject),
+                    priority=_h(priority_labels.get(priority, priority)),
+                    name=_h(name),
+                    email=_h(email),
+                    description=_h(description),
+                )
+                ticket.sudo().message_subscribe(partner_ids=partner_ids)
+                ticket.sudo().message_post(
+                    body=body,
+                    subject=f"[{ticket.number}] {subject}",
+                    message_type="comment",
+                    subtype_xmlid="mail.mt_comment",
+                    partner_ids=partner_ids,
+                )
+                _logger.info("Ticket %s notified %s team members", ticket.number, len(partner_ids))
+        except Exception:  # noqa: BLE001
+            _logger.exception("Team notification FAILED for ticket %s", ticket.number)
 
         return request.redirect(f"/helpdesk/{team.id}?submitted={ticket.number}")
 
