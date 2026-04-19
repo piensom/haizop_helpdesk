@@ -232,3 +232,34 @@
     .hz-portal-table td:nth-child(5) { display: none; }
     .hz-portal-footer-inner { flex-direction: column; text-align: center; }
 }
+
+.hz-portal-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.hz-portal-head-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+}
+.hz-portal-link-muted {
+    color: #64748b !important;
+    font-size: 13px;
+    text-decoration: none !important;
+}
+.hz-portal-link-muted:hover { color: #002b5c !important; }
+@media (max-width: 640px) {
+    .hz-portal-form-row { grid-template-columns: 1fr; }
+    .hz-portal-head-actions { align-items: stretch; }
+}
+
+/* Label fix — force block layout on portal-card forms */
+.hz-portal-card form label {
+    display: block !important;
+    margin-bottom: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    width: 100%;
+}
+.hz-portal-card form .hz-portal-form-row { margin-bottom: 0; }
+.hz-portal-card form .hz-portal-form-row > label { margin-bottom: 14px; }
+.hz-portal-card form .hz-portal-input { display: block; margin-top: 4px; }

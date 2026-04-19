@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Make outbound mail compatible with restrictive SMTPs (STRATO etc.)
+         where envelope-from must match the authenticated mailbox.
+         Override per-deployment via Settings -> Technical -> System Parameters. -->
+    <record id="ir_config_mail_catchall_domain" model="ir.config_parameter">
+        <field name="key">mail.catchall.domain</field>
+        <field name="value">haizop.de</field>
+    </record>
+    <record id="ir_config_mail_catchall_alias" model="ir.config_parameter">
+        <field name="key">mail.catchall.alias</field>
+        <field name="value">schindowski</field>
+    </record>
+    <record id="ir_config_mail_default_from" model="ir.config_parameter">
+        <field name="key">mail.default.from</field>
+        <field name="value">schindowski</field>
+    </record>
+    <record id="ir_config_mail_default_from_filter" model="ir.config_parameter">
+        <field name="key">mail.default.from_filter</field>
+        <field name="value">haizop.de</field>
+    </record>
+    <record id="ir_config_mail_bounce_alias" model="ir.config_parameter">
+        <field name="key">mail.bounce.alias</field>
+        <field name="value">schindowski+bounce</field>
+    </record>
+</odoo>

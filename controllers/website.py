@@ -1,7 +1,10 @@
 import base64
+import logging
 
 from odoo import _, http
 from odoo.http import request
+
+_logger = logging.getLogger(__name__)
 
 
 def _save_attachments(files, ticket):
@@ -92,9 +95,12 @@ class HelpdeskWebsite(http.Controller):
         template = request.env.ref("haizop_helpdesk.mail_template_ticket_ack", raise_if_not_found=False)
         if template:
             try:
-                template.sudo().send_mail(ticket.id, force_send=False, email_values={"email_to": email})
-            except Exception:  # pragma: no cover
-                pass
+                template.sudo().send_mail(ticket.id, force_send=True,
+                                          email_values={"email_to": email})
+                _logger.info("Helpdesk ack queued for ticket %s to %s", ticket.number, email)
+            except Exception:  # noqa: BLE001
+                _logger.exception("Helpdesk ack email FAILED for ticket %s -> %s",
+                                  ticket.number, email)
 
         return request.redirect(f"/helpdesk/{team.id}?submitted={ticket.number}")
 

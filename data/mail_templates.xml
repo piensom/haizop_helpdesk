@@ -3,16 +3,40 @@
     <record id="mail_template_ticket_ack" model="mail.template">
         <field name="name">Helpdesk: Ticket Acknowledgement</field>
         <field name="model_id" ref="model_helpdesk_ticket"/>
-        <field name="subject">[{{ object.number }}] We received your request</field>
-        <field name="email_from">{{ (object.team_id.alias_email or user.email_formatted) }}</field>
+        <field name="subject">[{{ object.number }}] Wir haben Ihre Anfrage erhalten</field>
+        <field name="email_from">"HAIZOP Support" &lt;schindowski@haizop.de&gt;</field>
+        <field name="reply_to">{{ object.team_id.alias_email or "info@haizop.com" }}</field>
         <field name="email_to">{{ object.partner_id.email or object.email_from }}</field>
         <field name="body_html" type="html">
-            <div style="font-family:Arial,sans-serif;color:#0f172a;">
-                <p>Hi <t t-out="object.partner_name or (object.partner_id.name or 'there')"/>,</p>
-                <p>Thanks for reaching out — we received your request and assigned it ticket
-                    <strong><t t-out="object.number"/></strong>.</p>
-                <p><em>"<t t-out="object.name"/>"</em></p>
-                <p>We'll follow up as soon as possible.</p>
+            <div style="font-family:Arial,-apple-system,Segoe UI,sans-serif;color:#0f172a;background:#f8fafc;padding:0;margin:0;">
+                <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+                    <div style="background:linear-gradient(120deg,#002b5c,#0284c7);color:#ffffff;padding:24px 28px;">
+                        <div style="font-size:14px;font-weight:600;letter-spacing:.04em;opacity:.8;text-transform:uppercase;">◆ HAIZOP Support</div>
+                        <div style="font-size:20px;font-weight:700;margin-top:4px;">Ticket <t t-out="object.number"/></div>
+                    </div>
+                    <div style="padding:24px 28px;font-size:15px;line-height:1.6;">
+                        <p style="margin-top:0;">Hallo <t t-out="object.partner_name or (object.partner_id.name or '')"/>,</p>
+                        <p>vielen Dank für Ihre Nachricht. Wir haben Ihre Anfrage erhalten und ihr die
+                            Nummer <strong><t t-out="object.number"/></strong> zugewiesen.</p>
+                        <div style="background:#f1f5f9;border-left:4px solid #0284c7;padding:12px 16px;margin:16px 0;border-radius:6px;">
+                            <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:4px;">Betreff</div>
+                            <div style="color:#0f172a;"><t t-out="object.name"/></div>
+                        </div>
+                        <p>Sie können den aktuellen Status jederzeit unter diesem Link prüfen:</p>
+                        <p style="text-align:center;margin:24px 0;">
+                            <a t-attf-href="https://haizop.de/helpdesk/track?number=#{object.number}&amp;email=#{object.email_from}"
+                               style="display:inline-block;background:#002b5c;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-weight:600;">
+                                Status prüfen →
+                            </a>
+                        </p>
+                        <p style="color:#64748b;font-size:13px;">Antworten Sie einfach auf diese E-Mail — Ihre Nachricht wird dem Ticket hinzugefügt.</p>
+                    </div>
+                    <div style="background:#f8fafc;padding:16px 28px;font-size:12px;color:#94a3b8;border-top:1px solid #e2e8f0;">
+                        HAIZOP GmbH · Tschaikowskistraße 21 · 04105 Leipzig<br/>
+                        <a href="https://haizop.de/impressum" style="color:#94a3b8;">Impressum</a> ·
+                        <a href="https://haizop.de/datenschutz" style="color:#94a3b8;">Datenschutz</a>
+                    </div>
+                </div>
             </div>
         </field>
     </record>

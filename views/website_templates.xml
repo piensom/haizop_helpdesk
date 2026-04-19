@@ -5,51 +5,62 @@
             <t t-set="is_logged" t-value="False"/>
             <div class="hz-portal-head">
                 <div>
-                    <h1>How can we help?</h1>
-                    <p class="hz-portal-muted">Submit a support request — we'll get back to you.</p>
+                    <h1>Support-Anfrage</h1>
+                    <p class="hz-portal-muted">
+                        Keine Anmeldung nötig. Füllen Sie das Formular aus — Sie erhalten unmittelbar
+                        eine Bestätigungs-E-Mail mit Ihrer Ticketnummer und können den Status jederzeit prüfen.
+                    </p>
                 </div>
-                <a href="/helpdesk/track" class="hz-portal-btn hz-portal-btn-outline">Track an existing ticket →</a>
+                <div class="hz-portal-head-actions">
+                    <a href="/helpdesk/track" class="hz-portal-btn hz-portal-btn-outline">Ticket-Status prüfen</a>
+                    <a href="/web/login" class="hz-portal-link-muted">Kunde? Anmelden →</a>
+                </div>
             </div>
 
             <t t-if="submitted">
                 <div class="hz-portal-alert hz-portal-alert-ok">
-                    ✓ Thanks! Your ticket <strong t-out="submitted"/> was created. Check the e-mail for follow-up.
+                    ✓ Danke! Ihr Ticket <strong t-out="submitted"/> wurde erstellt.
+                    Eine Bestätigungs-E-Mail ist unterwegs — bewahren Sie die Ticketnummer auf,
+                    damit Sie unter <a href="/helpdesk/track">Ticket-Status prüfen</a> jederzeit nachschauen können.
                 </div>
             </t>
 
             <div class="hz-portal-card">
                 <form t-attf-action="/helpdesk/#{team.id}/submit" method="post" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                    <label>Name *
-                        <input type="text" name="name" class="hz-portal-input" required="1"/>
+                    <div class="hz-portal-form-row">
+                        <label>Name *
+                            <input type="text" name="name" class="hz-portal-input" required="1"/>
+                        </label>
+                        <label>E-Mail *
+                            <input type="email" name="email" class="hz-portal-input" required="1"/>
+                        </label>
+                    </div>
+                    <label>Betreff *
+                        <input type="text" name="subject" class="hz-portal-input" placeholder="Kurze Zusammenfassung" required="1"/>
                     </label>
-                    <label>E-mail *
-                        <input type="email" name="email" class="hz-portal-input" required="1"/>
-                    </label>
-                    <label>Subject *
-                        <input type="text" name="subject" class="hz-portal-input" required="1"/>
-                    </label>
-                    <label>Priority
+                    <label>Priorität
                         <select name="priority" class="hz-portal-input">
-                            <option value="1">Low</option>
+                            <option value="1">Niedrig</option>
                             <option value="2" selected="1">Normal</option>
-                            <option value="3">High</option>
-                            <option value="4">Urgent</option>
+                            <option value="3">Hoch</option>
+                            <option value="4">Dringend</option>
                         </select>
                     </label>
-                    <label>Description *
-                        <textarea name="description" rows="6" class="hz-portal-input" required="1"/>
+                    <label>Beschreibung *
+                        <textarea name="description" rows="6" class="hz-portal-input"
+                                  placeholder="Was ist passiert? Schritte, erwartetes Verhalten, beobachtetes Verhalten." required="1"/>
                     </label>
                     <div class="hz-portal-file">
-                        <label>Attach screenshots or logs (optional):
+                        <label>Screenshots oder Logs anhängen (optional):
                             <input type="file" name="attachments" multiple="multiple"/>
                         </label>
                     </div>
                     <div class="hz-portal-actions">
-                        <button type="submit" class="hz-portal-btn hz-portal-btn-primary">Submit ticket</button>
+                        <button type="submit" class="hz-portal-btn hz-portal-btn-primary">Ticket erstellen</button>
                     </div>
                     <p class="hz-portal-muted" style="margin-top: 12px;">
-                        By submitting, you accept our <a href="/datenschutz">privacy policy</a>.
+                        Mit dem Absenden stimmen Sie unserer <a href="/datenschutz">Datenschutzerklärung</a> zu.
                     </p>
                 </form>
             </div>

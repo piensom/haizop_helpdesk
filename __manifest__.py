@@ -28,6 +28,7 @@ Highlights vs. Enterprise:
         "data/ir_sequence.xml",
         "data/helpdesk_data.xml",
         "data/mail_templates.xml",
+        "data/mail_config.xml",
         "data/ir_cron.xml",
         "views/helpdesk_tag_views.xml",
         "views/helpdesk_ticket_type_views.xml",
